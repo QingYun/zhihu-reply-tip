@@ -9,6 +9,10 @@
 
 var HIDE_STYLE = "display: none";
 
+function hasClass(node, className) {
+	return node && node.classList && node.classList.contains(className);
+}
+
 function createReplyTipNode() {
     var a = document.createElement("a");
     a.setAttribute("href", "#");
@@ -32,61 +36,70 @@ function latestReply(commentItems, userLookingFor, endIndex) {
     }
 }
 
-function addReplyTips(commentBox) {
-    if (commentBox.getAttribute("data-count") < 2)
+function addOneReplyTip(commentItems, targetIndex) {
+    var curItem = commentItems[targetIndex];
+    if (curItem.querySelector("q") !== null) 
         return ;
     
-    var commentItems = commentBox.querySelectorAll(".zm-item-comment");
-    for (var i = 0; i < commentItems.length; i++) {
-        var curItem = commentItems[i];
-        if (curItem.querySelector("q") === null) {
-            var headNode = curItem.querySelector(".zm-comment-hd");
-            if (headNode.childNodes.length > 3) {
-                var referredUser;
-                if (headNode.firstChild.nodeValue == "\n匿名用户")
-                    referredUser = headNode.querySelectorAll(".zg-link")[0];
-                else
-                    referredUser = headNode.querySelectorAll(".zg-link")[1];
-                
-                if (referredUser) {
-                    var replyTip = createReplyTipNode();
+    var headNode = curItem.querySelector(".zm-comment-hd");
+    if (headNode.childNodes.length > 3) {
+        var referredUser;
+        if (headNode.firstChild.nodeValue == "\n匿名用户")
+            referredUser = headNode.querySelectorAll(".zg-link")[0];
+        else
+            referredUser = headNode.querySelectorAll(".zg-link")[1];
+        
+        if (referredUser) {
+            var replyTip = createReplyTipNode();
+            var referredReply = latestReply(commentItems, referredUser.textContent, targetIndex);
+            
+            replyTip.addEventListener("click", function() {
+                var q;
+                if (curItem.querySelector("q") === null) {
+                    q = document.createElement("q");
+                    q.setAttribute("style", HIDE_STYLE);
+                    q.appendChild(document.createTextNode(referredReply));
                     
-                    replyTip.addEventListener("click", (function(curItem, referredReply) { 
-                        return function() {
-                            var q;
-                            if (curItem.querySelector("q") === null) {
-                                q = document.createElement("q");
-                                q.setAttribute("style", HIDE_STYLE);
-                                q.appendChild(document.createTextNode(referredReply));
-                                
-                                var content = curItem.querySelector(".zm-comment-content");
-                                content.parentNode.insertBefore(q, content);
-                            } else {
-                                q = curItem.querySelector("q");
-                            }
-                            
-                            if (q.getAttribute("style") == HIDE_STYLE) {
-                                q.removeAttribute("style");
-                            } else {
-                                q.setAttribute("style", HIDE_STYLE);
-                            }
-                        };
-                    })(curItem, latestReply(commentItems, referredUser.textContent, i)));
-                    
-                    curItem.querySelector(".zm-comment-hd").appendChild(replyTip);
+                    var content = curItem.querySelector(".zm-comment-content");
+                    content.parentNode.insertBefore(q, content);
+                } else {
+                    q = curItem.querySelector("q");
                 }
-            }
+                
+                if (q.getAttribute("style") == HIDE_STYLE) {
+                    q.removeAttribute("style");
+                } else {
+                    q.setAttribute("style", HIDE_STYLE);
+                }
+            });
+            
+            curItem.querySelector(".zm-comment-hd").appendChild(replyTip);
         }
     }
 }
 
+function addReplyTips(commentList) {
+    var commentItems = commentList.querySelectorAll(".zm-item-comment");
+    for (var i = 0; i < commentItems.length; i++) {
+        addOneReplyTip(commentItems, i);
+    }
+}
+
 (function(){
+    var addReplyTipTimer;
     var observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type == "childList") {
-                if (mutation.addedNodes.length && mutation.addedNodes[0].classList && mutation.addedNodes[0].classList.contains("zm-comment-box")
-                    && mutation.removedNodes.length && mutation.removedNodes[0].classList && mutation.removedNodes[0].classList.contains("zm-comment-box")) {
-                    addReplyTips(mutation.addedNodes[0]);
+                var firstAddedNode = mutation.addedNodes.length && mutation.addedNodes[0];
+                var firstRemovedNode = mutation.removedNodes.length && mutation.removedNodes[0];
+                
+                if (hasClass(firstAddedNode, "zm-comment-box") && hasClass(firstRemovedNode, "zm-comment-box"))
+                    addReplyTips(mutation.addedNodes[0].querySelector(".zm-comment-list"));
+                else if (hasClass(firstAddedNode, "zm-item-comment")) {
+                	if (addReplyTipTimer) clearTimeout(addReplyTipTimer);
+                    addReplyTipTimer = setTimeout(function() {
+                    	addReplyTips(mutation.target);
+                    }, 100);
                 }
             }
         });
