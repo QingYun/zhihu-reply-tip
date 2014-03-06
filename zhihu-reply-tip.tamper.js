@@ -61,10 +61,8 @@ function addReplyTips(commentBox) {
                                 
                                 var content = curItem.querySelector(".zm-comment-content");
                                 content.parentNode.insertBefore(q, content);
-                                console.log(content)
                             } else {
                                 q = curItem.querySelector("q");
-                                console.log("query")
                             }
                             
                             if (q.getAttribute("style") == HIDE_STYLE) {
