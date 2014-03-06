@@ -50,7 +50,7 @@ function latestReply(commentItems, userLookingFor, endIndex) {
 
 function addOneReplyTip(commentItems, targetIndex) {
     var curItem = commentItems[targetIndex];
-    if (curItem.querySelector("q") !== null) 
+    if (curItem.querySelector("blockquote") !== null) 
         return ;
     
     var headNode = curItem.querySelector(".zm-comment-hd");
@@ -64,22 +64,18 @@ function addOneReplyTip(commentItems, targetIndex) {
         if (referredUser) {
             var replyTip = createReplyTipNode();
             var referredReply = latestReply(commentItems, referredUser.textContent, targetIndex);
-            
+            var q = null;
             replyTip.addEventListener("click", function() {
-                var q;
-                if (curItem.querySelector("q") === null) {
+                if (q === null) {
                     q = createQuoteBlockNode(referredReply);
                     var content = curItem.querySelector(".zm-comment-content");
                     content.parentNode.insertBefore(q, content);
-                } else {
-                    q = curItem.querySelector("q");
                 }
                 
-                if (q.getAttribute("style") == HIDE_STYLE) {
+                if (q.getAttribute("style") == HIDE_STYLE)
                     q.removeAttribute("style");
-                } else {
+                else
                     q.setAttribute("style", HIDE_STYLE);
-                }
             });
             
             curItem.querySelector(".zm-comment-hd").appendChild(replyTip);
