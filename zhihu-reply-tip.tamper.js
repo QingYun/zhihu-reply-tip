@@ -27,6 +27,18 @@ function createReplyTipNode() {
     return a;
 }
 
+function createQuoteBlockNode(content) {
+	var bq = document.createElement("blockquote");
+    bq.setAttribute("style", HIDE_STYLE);
+    
+    var p = document.createElement("p");
+    p.appendChild(document.createTextNode(content));
+    
+    bq.appendChild(p);
+    
+    return bq;
+}
+
 function latestReply(commentItems, userLookingFor, endIndex) {
     for (var i = endIndex - 1; i >= 0 ; i--) {
         var curUser = commentItems[i].querySelector(".zg-link").textContent;
@@ -56,10 +68,7 @@ function addOneReplyTip(commentItems, targetIndex) {
             replyTip.addEventListener("click", function() {
                 var q;
                 if (curItem.querySelector("q") === null) {
-                    q = document.createElement("q");
-                    q.setAttribute("style", HIDE_STYLE);
-                    q.appendChild(document.createTextNode(referredReply));
-                    
+                    q = createQuoteBlockNode(referredReply);
                     var content = curItem.querySelector(".zm-comment-content");
                     content.parentNode.insertBefore(q, content);
                 } else {
