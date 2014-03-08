@@ -16,7 +16,7 @@ function hasClass(node, className) {
 function createReplyTipNode() {
     var a = document.createElement("a");
     a.setAttribute("href", "#");
-    a.setAttribute("class", "reply zm-comment-op-link");
+    a.setAttribute("class", "like zm-comment-op-link");
     
     var i = document.createElement("i");
     i.setAttribute("class", "zg-icon zg-icon-comment-reply");
