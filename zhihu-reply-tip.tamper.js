@@ -50,7 +50,7 @@ function latestReply(commentItems, userLookingFor, endIndex) {
 
 function addOneReplyTip(commentItems, targetIndex) {
     var curItem = commentItems[targetIndex];
-    if (curItem.querySelector("blockquote") !== null) 
+    if (curItem.querySelector(".zm-comment-hd .like") !== null) 
         return ;
     
     var headNode = curItem.querySelector(".zm-comment-hd");
