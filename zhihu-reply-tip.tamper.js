@@ -62,9 +62,12 @@ function addOneReplyTip(commentItems, targetIndex) {
             referredUser = headNode.querySelectorAll(".zg-link")[1];
         
         if (referredUser) {
-            var replyTip = createReplyTipNode();
             var referredReply = latestReply(commentItems, referredUser.textContent, targetIndex);
+            if (!referredReply)
+                return ;
+            
             var q = null;
+            var replyTip = createReplyTipNode();
             replyTip.addEventListener("click", function() {
                 if (q === null) {
                     q = createQuoteBlockNode(referredReply);
